@@ -33,6 +33,8 @@ class UploadedFileModel(db.Model):
             raise Exception("Upload not found.")
         if not result_upload.verify_pass(password):
             raise Exception("Password incorrect.")
+        if not upload.check_expiration_time():
+            raise Exception("Upload expired.")
         result_file = UploadedFileModel.query.filter_by(upload_id = result_upload.id, number_in_upload = file_index).first()
         if result_file is None:
             raise Exception("File not found.")

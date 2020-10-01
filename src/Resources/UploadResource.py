@@ -16,18 +16,17 @@ class UploadResource(Resource):
         for index,file in enumerate(request.files.getlist('files[]'),1):
             uploaded_file = UploadedFileModel(new_upload.id,index, file)
             uploaded_file.save()
+        
         return marshal(new_upload, upload_fields, envelope='Upload')
         
     def get(self, url_hash = None):
         if url_hash is None: # Getting all uploads is temporary 
             uploads = UploadModel.get_all_uploads()
-            for upload in uploads:
-                uploaded_files = upload.uploaded_files
-                for file in uploaded_files:
-                    print(file)
             return marshal(uploads,upload_fields, envelope='Uploads')
-        else:
-            upload = UploadModel.get_upload_by_url_hash(url_hash)
-            if upload:
-                return marshal(upload, upload_fields, envelope='Upload')
+        upload = UploadModel.get_upload_by_url_hash(url_hash)
+        if upload is None:
             abort(404, message='Invalid url hash')
+        if not upload.check_expiration_time():
+            abort(400, message='Upload expired')
+        return marshal(upload, upload_fields, envelope='Upload')
+            

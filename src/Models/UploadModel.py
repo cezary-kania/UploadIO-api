@@ -1,6 +1,7 @@
 from . import main_db as db
 from sqlalchemy.orm import relationship
 from passlib.hash import pbkdf2_sha256 as sha256
+from datetime import datetime, date as dt, timedelta 
 class UploadModel(db.Model):
     
     __tablename__ = 'Uploads'
@@ -8,20 +9,27 @@ class UploadModel(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     url_hash = db.Column(db.String(10), nullable = False)
     password = db.Column(db.String(256))
+    has_expired = db.Column(db.Boolean, server_default = 'f', default = False)
     expiration_date = db.Column(db.String(10))
     uploaded_files = relationship('UploadedFileModel', back_populates='upload')
     
-    def __init__(self, upload_pass = '', expiration_date = None):
+    def __init__(self, upload_pass = '', days_to_expire = 1):
         self.url_hash = UploadModel.get_new_url_hash()
         self.password = sha256.hash(upload_pass)
-        self.expiration_date = expiration_date
-
+        date = dt.today()
+        date += timedelta(days = days_to_expire)
+        self.expiration_date = str(date) 
+        
     def save(self):
         db.session.add(self)
         db.session.commit()
     
     def verify_pass(self, pass_to_verify):
         return sha256.verify(pass_to_verify, self.password)
+    
+    def check_expiration_time(self):
+        date = str(dt.today())
+        return self.expiration_date >= date
     @staticmethod
     def generate_url_hash():
         import string, random
