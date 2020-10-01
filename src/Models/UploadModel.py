@@ -1,22 +1,27 @@
-from . import db
+from . import main_db as db
 from sqlalchemy.orm import relationship
+from passlib.hash import pbkdf2_sha256 as sha256
 class UploadModel(db.Model):
     
-    __tablename__ = 'uploads'
+    __tablename__ = 'Uploads'
     
     id = db.Column(db.Integer, primary_key = True)
     url_hash = db.Column(db.String(10), nullable = False)
-    password = db.Column(db.String(100))
-    expiration_date = db.Column(db.String(20))
-
-    def __init__(self, upload_pass = None, expiration_date = None):
+    password = db.Column(db.String(256))
+    expiration_date = db.Column(db.String(10))
+    uploaded_files = relationship('UploadedFileModel', back_populates='upload')
+    
+    def __init__(self, upload_pass = '', expiration_date = None):
         self.url_hash = UploadModel.get_new_url_hash()
-        self.password = upload_pass
+        self.password = sha256.hash(upload_pass)
         self.expiration_date = expiration_date
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+    
+    def verify_pass(self, pass_to_verify):
+        return sha256.verify(pass_to_verify, self.password)
     @staticmethod
     def generate_url_hash():
         import string, random
@@ -44,4 +49,3 @@ class UploadModel(db.Model):
     def get_upload_by_url_hash(url_hash):
         return UploadModel.query.filter_by(url_hash = url_hash).first()
         
-
