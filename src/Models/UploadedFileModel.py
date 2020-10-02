@@ -30,13 +30,13 @@ class UploadedFileModel(db.Model):
     def get_file_by_upload(url_hash,password, file_index):
         result_upload = UploadModel.query.filter_by(url_hash = url_hash).first()
         if result_upload is None:
-            raise Exception("Upload not found.")
-        if not result_upload.verify_pass(password):
-            raise Exception("Password incorrect.")
-        if not upload.check_expiration_time():
-            raise Exception("Upload expired.")
+            raise Exception(message = "Upload not found.")
+        if result_upload.is_pass_required() and (not result_upload.verify_pass(password)):
+            raise Exception(message = "Password incorrect.")
+        if not result_upload.check_expiration_time():
+            raise Exception(message = "Upload expired.")
         result_file = UploadedFileModel.query.filter_by(upload_id = result_upload.id, number_in_upload = file_index).first()
         if result_file is None:
-            raise Exception("File not found.")
+            raise Exception(message = "File not found.")
         file = gfs.get(ObjectId(result_file.mongo_id))
         return file

@@ -13,9 +13,9 @@ class UploadModel(db.Model):
     expiration_date = db.Column(db.String(10))
     uploaded_files = relationship('UploadedFileModel', back_populates='upload')
     
-    def __init__(self, upload_pass = '', days_to_expire = 1):
+    def __init__(self, upload_pass = None, days_to_expire = 1):
         self.url_hash = UploadModel.get_new_url_hash()
-        self.password = sha256.hash(upload_pass)
+        self.password = sha256.hash(upload_pass) if (upload_pass is not None) and (upload_pass is not '') else None
         date = dt.today()
         date += timedelta(days = days_to_expire)
         self.expiration_date = str(date) 
@@ -25,11 +25,16 @@ class UploadModel(db.Model):
         db.session.commit()
     
     def verify_pass(self, pass_to_verify):
+        if self.password is None: return True
         return sha256.verify(pass_to_verify, self.password)
     
     def check_expiration_time(self):
         date = str(dt.today())
         return self.expiration_date >= date
+
+    def is_pass_required(self):
+        return self.password is not None
+
     @staticmethod
     def generate_url_hash():
         import string, random
