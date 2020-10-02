@@ -13,3 +13,5 @@ class DevConfig(Config):
     MONGO_URI = 'mongodb://localhost:27017/'
     ENV = 'development'
     DEBUG = True
+    # JWT 
+    WT_SECRET_KEY = 'jwt-sercret-string'

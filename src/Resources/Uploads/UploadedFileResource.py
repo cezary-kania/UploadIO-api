@@ -19,4 +19,4 @@ class UploadedFileResource(Resource):
             result_file = UploadedFileModel.get_file_by_upload(upload_hash,upload_password, file_index)
             return Response(result_file, mimetype=result_file.content_type, direct_passthrough=False)
         except Exception as e:
-            abort(404, message = str(e))
+            abort(400, message = str(e))
