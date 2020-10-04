@@ -29,6 +29,10 @@ class UserModel(db.Model):
 
     def validate_pass(self, pass_to_validate):
         return sha256.verify(pass_to_validate, self.pass_hash)
+    
+    def change_pass(self, new_pass):
+        self.pass_hash = sha256.hash(new_pass)
+        db.session.commit()
     @staticmethod
     def add(user_obj):
         db.session.add(user_obj)
@@ -44,9 +48,12 @@ class UserModel(db.Model):
 
     @staticmethod
     def delete_user(user_login):
-        deleted = UserModel.query.filter_by(login = user_login).first().delete()
-        db.session.commit()
-        return deleted == 1
+        user = UserModel.query.filter_by(login = user_login).first()
+        if user is not None:
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        return False 
 
     @staticmethod
     def get_all_users():

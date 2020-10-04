@@ -11,3 +11,4 @@ resources = uploads_resources + users_resources
 
 for res,endpoint in resources:
     api.add_resource(res,endpoint)
+    print(endpoint)
