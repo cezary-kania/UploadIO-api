@@ -1,6 +1,6 @@
 from flask_restful import Resource, abort, reqparse
 
-from Models.UploadModel import UploadModel
+from Models.Uploads.UploadModel import UploadModel
 
 class UploadCheckResource(Resource):
     def get(self):

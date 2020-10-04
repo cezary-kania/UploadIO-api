@@ -1,8 +1,8 @@
 from flask_restful import Resource, abort, request, reqparse
 from werkzeug import Response
 
-from Models.UploadModel import UploadModel
-from Models.UploadedFileModel import UploadedFileModel
+from Models.Uploads.UploadModel import UploadModel
+from Models.Uploads.UploadedFileModel import UploadedFileModel
 from Serializers.UploadFields import upload_fields
 
 class UploadedFileResource(Resource):
@@ -17,6 +17,6 @@ class UploadedFileResource(Resource):
         upload_password = data['upload_pass']
         try:
             result_file = UploadedFileModel.get_file_by_upload(upload_hash,upload_password, file_index)
-            return Response(result_file, mimetype=result_file.content_type, direct_passthrough=False)
+            return Response(result_file, mimetype=result_file.content_type, direct_passthrough=True)
         except Exception as e:
             abort(400, message = str(e))

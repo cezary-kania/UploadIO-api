@@ -15,6 +15,7 @@ def create_app():
     jwt = JWTManager(app)
 
     mongo_client.host = app.config['MONGO_URI']
+    
     main_db.init_app(app)
     with app.app_context():
         main_db.create_all()

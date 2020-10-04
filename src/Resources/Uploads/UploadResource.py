@@ -1,7 +1,7 @@
 from flask_restful import Resource, marshal, abort, request, reqparse
 
-from Models.UploadModel import UploadModel
-from Models.UploadedFileModel import UploadedFileModel
+from Models.Uploads.UploadModel import UploadModel
+from Models.Uploads.UploadedFileModel import UploadedFileModel
 from Serializers.UploadFields import upload_fields
 
 class UploadResource(Resource):
@@ -12,11 +12,13 @@ class UploadResource(Resource):
         if files_amount <= 0 or files_amount > 5 or request.files.getlist('files[]')[0].filename == '':
             abort(400, message = 'Invalid files amount')
         upload_pass = request.form['upload_pass']
-        days_to_expire = int(request.form['days_to_expire'])
+        days_to_expire = request.form['days_to_expire']
+        days_to_expire = 1 if days_to_expire is None or days_to_expire not in [1, 2, 7, 14] else int(days_to_expire)
         new_upload = UploadModel(upload_pass,days_to_expire)
         new_upload.save()
         for index,file in enumerate(request.files.getlist('files[]'),1):
-            uploaded_file = UploadedFileModel(new_upload.id,index, file)
+            uploaded_file = UploadedFileModel(file,index)
+            uploaded_file.upload = new_upload
             uploaded_file.save()
         
         return marshal(new_upload, upload_fields, envelope='Upload')
@@ -37,6 +39,8 @@ class UploadResource(Resource):
             abort(404, message='Invalid url hash')
         if not upload.check_expiration_time():
             abort(400, message='Upload expired')
+        if not upload.check_is_active():
+            abort(400, message='Upload not active')
         if upload.is_pass_required():
             if upload_pass is None or (not upload.verify_pass(upload_pass)):
                 abort(400, message = 'Invalid password')

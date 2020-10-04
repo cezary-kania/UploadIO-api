@@ -6,29 +6,23 @@ from Serializers.UserFields import user_fields
 class UserLoginResource(Resource):
     def post(self):
         req_parser = reqparse.RequestParser()
-        req_parser.add_argument('Login', location = 'json')
+        req_parser.add_argument('login_or_email', required = True, location = 'json')
         req_parser.add_argument('Password', required = True, location = 'json')
-        req_parser.add_argument('E-mail', location = 'json')
         request_data = req_parser.parse_args()
 
-        user_login = request_data['Login']
+        user_identifier = request_data['login_or_email']
         user_pass = request_data['Password']
-        user_email = request_data['E-mail']
         
-        user = None
-        if user_login is None and user_email is None:
-            abort(400, message = f'Login or email required.')
-        if user_login is not None:
-            user = UserModel.get_user(login = user_login)
-            if user is None: 
-                abort(400, message = f'User {user_login} doesn\'t exists.')
-        else:
-            user = UserModel.get_user(email = user_email)
+        user = UserModel.get_user(login = user_identifier)
+        if user is None: 
+            user = UserModel.get_user(email = user_identifier)
             if user is None:
-                abort(400, message = f'User with email: {user_email} doesn\'t exists.')
+                abort(400, message = f'User {user_identifier} doesn\'t exists.')
+        if not user.validate_pass(user_pass):
+            abort(400, message = f'User login or password not valid. Try again.')
         return {
             'Login' : user.login,
-            'access_token' : create_access_token(identity = user_login),
-            'refresh_token' : create_refresh_token(identity = user_login)
+            'access_token' : create_access_token(identity = user.login),
+            'refresh_token' : create_refresh_token(identity = user.login)
         }, 200
         

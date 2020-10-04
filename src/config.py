@@ -14,4 +14,4 @@ class DevConfig(Config):
     ENV = 'development'
     DEBUG = True
     # JWT 
-    WT_SECRET_KEY = 'jwt-sercret-string'
+    JWT_SECRET_KEY = 'jwt-sercret-string'

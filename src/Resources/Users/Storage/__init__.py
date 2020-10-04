@@ -1,4 +1,7 @@
+from .UserStorageResource import UserStorageResource
 
 url_prefix = '/storage'
 
-resources = []
+resources = [
+    (UserStorageResource, f'{url_prefix}/')
+]

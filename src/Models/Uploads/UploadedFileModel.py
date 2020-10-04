@@ -1,7 +1,7 @@
-from . import main_db as db, gfs
+from Models import main_db as db, gfs
 from sqlalchemy.orm import relationship
 from bson import ObjectId
-from Models.UploadModel import UploadModel
+from Models.Uploads.UploadModel import UploadModel
 
 class UploadedFileModel(db.Model):
     __tablename__ = 'UploadedFiles'
@@ -13,12 +13,14 @@ class UploadedFileModel(db.Model):
     filename = db.Column(db.String(300), nullable = False)
     mongo_id = db.Column(db.String(20), nullable = False)
     
-    def __init__(self, upload_id,number_in_upload, file):
-        self.filename = file.filename
+    def __init__(self, file, number_in_upload = 1, user_upload = False):
         self.number_in_upload = number_in_upload
-        self.upload_id = upload_id
-        self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
-
+        if user_upload is False:
+            self.filename = file.filename
+            self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
+        else:
+            self.filename = file.filename
+            self.mongo_id = file.mongo_id 
     def save(self):
         db.session.add(self)
         db.session.commit()
