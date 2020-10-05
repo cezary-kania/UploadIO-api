@@ -5,5 +5,6 @@ upload_fields = {
     'expiration_date' : fields.String,
     'has_expired' : fields.Boolean,
     'password' : fields.String,
+    'size' : fields.Integer,
     'uploaded_files' : fields.List(fields.Nested(uploaded_file_fields))
 }

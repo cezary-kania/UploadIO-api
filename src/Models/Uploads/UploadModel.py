@@ -13,6 +13,8 @@ class UploadModel(db.Model):
     expiration_date = db.Column(db.String(10))
     uploaded_files = relationship('UploadedFileModel', back_populates='upload')
     is_active = db.Column(db.Boolean)
+    size = db.Column(db.Integer)
+
     def __init__(self, upload_pass = None, days_to_expire = None):
         self.url_hash = UploadModel.get_new_url_hash()
         self.password = sha256.hash(upload_pass) if (upload_pass is not None) and (upload_pass is not '') else None
@@ -67,4 +69,19 @@ class UploadModel(db.Model):
     @staticmethod
     def get_upload_by_url_hash(url_hash):
         return UploadModel.query.filter_by(url_hash = url_hash).first()
-        
+
+    @staticmethod
+    def delete_all_uploads():
+        rows_deleted = db.session.query(UploadModel).delete()
+        db.session.commit()
+        return rows_deleted
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+    @staticmethod
+    def delete_upload(hash):
+        upload = UploadModel.query.filter_by(url_hash = hash).first()
+        deleted_rows = db.session.delete(upload)
+        db.session.commit()
+        return deleted_rows 

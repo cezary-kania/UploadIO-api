@@ -46,6 +46,7 @@ class StorageElModel(db.Model):
             {"filename" : self.filename, "mongo_id" : self.mongo_id},
             user_upload = True
         )
+        upload.size = self.size
         uploaded_file.upload = upload 
         upload.save()
         self.is_shared = True

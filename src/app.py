@@ -13,7 +13,6 @@ def create_app():
     app.register_blueprint(api_bp, url_prefix='/api')
     cors = CORS(app, resources= {r'/*':{"origins" : "*"}})
     jwt = JWTManager(app)
-
     mongo_client.host = app.config['MONGO_URI']
     
     main_db.init_app(app)

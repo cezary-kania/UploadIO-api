@@ -23,6 +23,7 @@ class UploadResource(Resource):
         days_to_expire = request.form['days_to_expire']
         days_to_expire = 1 if days_to_expire is None or days_to_expire not in [1, 2, 7, 14] else int(days_to_expire)
         new_upload = UploadModel(upload_pass,days_to_expire)
+        new_upload.size = request_size
         new_upload.save()
         for index,file in enumerate(files,1):
             uploaded_file = UploadedFileModel(file,index)
