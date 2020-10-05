@@ -16,6 +16,5 @@ class AccountDeleteResource(Resource):
             abort(400, message = 'Something gone wrong')
         if not user.validate_pass(user_pass):
             abort(400, message = 'Invalid password.')
-        user.storage.delete()
         UserModel.delete_user(user.login)
         return {'msg' : 'User deleted'}, 204

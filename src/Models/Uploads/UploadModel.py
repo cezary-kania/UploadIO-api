@@ -9,7 +9,6 @@ class UploadModel(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     url_hash = db.Column(db.String(10), nullable = False)
     password = db.Column(db.String(256))
-    has_expired = db.Column(db.Boolean, server_default = 'f', default = False)
     expiration_date = db.Column(db.String(10))
     uploaded_files = relationship('UploadedFileModel', back_populates='upload')
     is_active = db.Column(db.Boolean)
@@ -23,7 +22,9 @@ class UploadModel(db.Model):
             date = dt.today()
             date += timedelta(days = days_to_expire)
             self.expiration_date = str(date) 
-        
+    @property
+    def has_expired(self):
+        return self.check_expiration_time()
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -72,16 +73,41 @@ class UploadModel(db.Model):
 
     @staticmethod
     def delete_all_uploads():
-        rows_deleted = db.session.query(UploadModel).delete()
+        rows_deleted = 0
+        uploads = UploadModel.query.all()
+        for upload in uploads:
+            upload.delete()
+            rows_deleted += 1
         db.session.commit()
         return rows_deleted
 
     def delete(self):
+        for file in self.uploaded_files:
+            file.delete()
         db.session.delete(self)
         db.session.commit()
+
     @staticmethod
     def delete_upload(hash):
         upload = UploadModel.query.filter_by(url_hash = hash).first()
         deleted_rows = db.session.delete(upload)
         db.session.commit()
         return deleted_rows 
+
+    @staticmethod
+    def get_expired_uploads():
+        uploads = UploadModel.query.all()
+        expired_uploads = []
+        for upload in uploads:
+            if upload.has_expired:
+                expired_uploads.append(upload)
+        return expired_uploads
+
+    @staticmethod
+    def delete_uploads(uploads_to_delete):
+        deleted_uploads = 0
+        for upload in uploads_to_delete:
+            upload.delete()
+            deleted_uploads += 1
+        db.session.commit()
+        return deleted_uploads

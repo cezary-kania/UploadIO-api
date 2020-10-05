@@ -4,19 +4,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from Models.Uploads.UploadModel import UploadModel
 from Models.Uploads.UploadedFileModel import UploadedFileModel
 from Serializers.UploadFields import upload_fields
+from Utils.JWT import admin_required
 
-
-class UploadResource(Resource):
+class AdUploadResource(Resource):
     
-    @jwt_required
+    @admin_required
     def delete(self):
-        from Models.Users.UserModel import UserModel
-        user_identity = get_jwt_identity()
-        user = UserModel.get_user(login = user_identity)
-        if user is None:
-            abort(500, message = 'Something gone wrong.')
-        if user.account_type != 'admin':
-            abort(403)
         parser = reqparse.RequestParser()
         parser.add_argument('upload_hash', required = False, location = 'json')
         request_data = parser.parse_args()
@@ -29,7 +22,8 @@ class UploadResource(Resource):
             abort(404, message='Invalid url hash')
             upload.delete()
         return {'msg' : 'Upload deleted'}, 204
-        
+    
+    @admin_required   
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('upload_hash', required = False, location = 'json')

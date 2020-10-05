@@ -33,6 +33,11 @@ class UserModel(db.Model):
     def change_pass(self, new_pass):
         self.pass_hash = sha256.hash(new_pass)
         db.session.commit()
+    
+    def set_type(self, account_type):
+        self.account_type = account_type if account_type in ['user', 'admin'] else 'user'
+        db.session.commit()
+    
     @staticmethod
     def add(user_obj):
         db.session.add(user_obj)
@@ -50,6 +55,7 @@ class UserModel(db.Model):
     def delete_user(user_login):
         user = UserModel.query.filter_by(login = user_login).first()
         if user is not None:
+            user.storage.delete()
             db.session.delete(user)
             db.session.commit()
             return True
@@ -58,3 +64,15 @@ class UserModel(db.Model):
     @staticmethod
     def get_all_users():
         return UserModel.query.all()
+    
+    @staticmethod
+    def delete_all_users():
+        users = UserModel.get_all_users()
+        deleted_rows = 0
+        for user in users:
+            UserModel.delete_user(login = user.login)
+            deleted_rows += 1
+        db.session.commit()
+        return deleted_rows
+    
+    

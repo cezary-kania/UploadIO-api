@@ -11,7 +11,7 @@ class UploadCheckResource(Resource):
         upload = UploadModel.get_upload_by_url_hash(url_hash)
         if upload is None:
             abort(404, message='Invalid url hash')
-        if not upload.check_expiration_time():
+        if not upload.has_expired:
             abort(400, message='Upload expired')
         pass_required = upload.is_pass_required()
         return {'status' : 'active', 'pass_required' : pass_required}, 200

@@ -21,8 +21,14 @@ class UploadedFileModel(db.Model):
         else:
             self.filename = file["filename"]
             self.mongo_id = file["mongo_id"]
+    
     def save(self):
         db.session.add(self)
+        db.session.commit()
+    
+    def delete(self):
+        gfs.delete(ObjectId(self.mongo_id))
+        db.session.delete(self)
         db.session.commit()
     
     def __repr__(self):
@@ -35,7 +41,7 @@ class UploadedFileModel(db.Model):
             raise Exception(message = "Upload not found.")
         if result_upload.is_pass_required() and (not result_upload.verify_pass(password)):
             raise Exception(message = "Password incorrect.")
-        if not result_upload.check_expiration_time():
+        if not result_upload.has_expired:
             raise Exception(message = "Upload expired.")
         result_file = UploadedFileModel.query.filter_by(upload_id = result_upload.id, number_in_upload = file_index).first()
         if result_file is None:

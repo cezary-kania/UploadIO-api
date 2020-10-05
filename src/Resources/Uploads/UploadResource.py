@@ -34,15 +34,11 @@ class UploadResource(Resource):
         
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('upload_hash', required = False, location = 'json')
+        parser.add_argument('upload_hash', required = True, location = 'json')
         parser.add_argument('upload_pass', required = False, location = 'json')
         request_data = parser.parse_args()
         url_hash = request_data['upload_hash']
         upload_pass = request_data['upload_pass']
-
-        if url_hash is None: # Getting all uploads is temporary 
-            uploads = UploadModel.get_all_uploads()
-            return marshal(uploads,upload_fields, envelope='Uploads')
         upload = UploadModel.get_upload_by_url_hash(url_hash)
         if upload is None:
             abort(404, message='Invalid url hash')

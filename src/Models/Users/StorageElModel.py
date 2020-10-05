@@ -19,7 +19,7 @@ class StorageElModel(db.Model):
     share_url = db.Column(db.String(10), default = None)
     size = db.Column(db.Integer, nullable = False)
     def __init__(self, file, el_type = 'file'):
-        self.filename = file.filename
+        self.set_filename(file.filename)
         self.el_type = el_type 
         self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
         self.size = get_file_size(file)
@@ -39,6 +39,9 @@ class StorageElModel(db.Model):
     def get_file(self):
         return gfs.get(ObjectId(self.mongo_id))
     def set_filename(self, new_filename): # TODO - expand implementation of filename setter 
+        #existing_file = StorageElModel.query.filter_by(filename = new_filename).first()
+        #ext = new_filename.
+        #while existing_file is not None:
         self.filename = new_filename
     def share(self, upload_pass = None):
         upload = UploadModel(upload_pass)
