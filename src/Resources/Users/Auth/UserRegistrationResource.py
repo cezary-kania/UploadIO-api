@@ -4,12 +4,14 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from Models.Users.UserModel import UserModel
 from Serializers.UserFields import user_fields
 
+from Utils.validators import user_validators
+
 class UserRegistrationResource(Resource):
     def post(self):
         req_parser = reqparse.RequestParser()
-        req_parser.add_argument('Login', required = True, location = 'json')
-        req_parser.add_argument('Password', required = True, location = 'json')
-        req_parser.add_argument('E-mail', required = True, location = 'json')
+        req_parser.add_argument('Login', type = user_validators["user_login"], required = True, location = 'json')
+        req_parser.add_argument('Password', type = user_validators["user_password"], required = True, location = 'json')
+        req_parser.add_argument('E-mail', type = user_validators["user_email"], required = True, location = 'json')
         request_data = req_parser.parse_args()
 
         user_login = request_data['Login']

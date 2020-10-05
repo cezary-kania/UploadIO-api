@@ -4,7 +4,7 @@ from bson import ObjectId
 
 from Models.Uploads.UploadModel import UploadModel
 from Models.Uploads.UploadedFileModel import UploadedFileModel
-
+from Utils.file_operators import get_file_size
 class StorageElModel(db.Model):
     
     __tablename__ = 'StorageElements'
@@ -17,18 +17,20 @@ class StorageElModel(db.Model):
     mongo_id = db.Column(db.String(20), nullable = False)
     is_shared = db.Column(db.Boolean, nullable = False, default = False)
     share_url = db.Column(db.String(10), default = None)
-
+    size = db.Column(db.Integer, nullable = False)
     def __init__(self, file, el_type = 'file'):
         self.filename = file.filename
         self.el_type = el_type 
         self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
-
+        self.size = get_file_size(file)
     def __repr__(self):
         return f'StorageElModel<filename = {self.filename}, mongo_id = {self.mongo_id}, is_shared = {self.is_shared}, >'
-    def save(self):
+    
+    def add(self):
         db.session.add(self)
         db.session.commit()
-
+    def save(self):
+        db.session.commit()
     def delete(self):
         gfs.delete(ObjectId(self.mongo_id))
         db.session.delete(self)
@@ -36,7 +38,8 @@ class StorageElModel(db.Model):
     
     def get_file(self):
         return gfs.get(ObjectId(self.mongo_id))
-
+    def set_filename(self, new_filename): # TODO - expand implementation of filename setter 
+        self.filename = new_filename
     def share(self, upload_pass = None):
         upload = UploadModel(upload_pass)
         uploaded_file = UploadedFileModel(
@@ -48,11 +51,22 @@ class StorageElModel(db.Model):
         self.is_shared = True
         self.share_url = upload.url_hash 
     def disable_sharing(self):
-        self.is_shared = True
+        self.is_shared = False
         upload = UploadModel.get_upload_by_url_hash(self.share_url)
+        self.share_url = None
         upload.is_active = False
     def get_share_info(self):
         return {
             "is_shared" : self.is_shared,
             "share_url" : self.share_url
         }
+    @staticmethod
+    def get_element(**params):
+        if 'id' in params.keys():
+            return StorageElModel.query.filter_by(id = params['id']).first()
+        return None
+    @staticmethod
+    def get_file_size(file):
+        from os import SEEK_END
+        file.seek(0, SEEK_END)
+        return file.tell()

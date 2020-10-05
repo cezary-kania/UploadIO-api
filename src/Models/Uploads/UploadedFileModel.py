@@ -19,8 +19,8 @@ class UploadedFileModel(db.Model):
             self.filename = file.filename
             self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
         else:
-            self.filename = file.filename
-            self.mongo_id = file.mongo_id 
+            self.filename = file["filename"]
+            self.mongo_id = file["mongo_id"]
     def save(self):
         db.session.add(self)
         db.session.commit()
