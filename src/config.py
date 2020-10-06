@@ -15,3 +15,4 @@ class DevConfig(Config):
     DEBUG = True
     # JWT 
     JWT_SECRET_KEY = 'jwt-sercret-string'
+    JWT_ACCESS_TOKEN_EXPIRES = False

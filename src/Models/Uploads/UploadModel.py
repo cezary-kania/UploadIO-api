@@ -22,6 +22,11 @@ class UploadModel(db.Model):
             date = dt.today()
             date += timedelta(days = days_to_expire)
             self.expiration_date = str(date) 
+    
+    @property
+    def password_required(self):
+        return True if self.password is not None else False
+    
     @property
     def has_expired(self):
         return self.check_expiration_time()

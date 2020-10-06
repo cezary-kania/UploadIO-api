@@ -1,6 +1,7 @@
 from Models import main_db as db, gfs
 from sqlalchemy.orm import relationship
 from bson import ObjectId
+import re
 
 from Models.Uploads.UploadModel import UploadModel
 from Models.Uploads.UploadedFileModel import UploadedFileModel
@@ -38,11 +39,14 @@ class StorageElModel(db.Model):
     
     def get_file(self):
         return gfs.get(ObjectId(self.mongo_id))
-    def set_filename(self, new_filename): # TODO - expand implementation of filename setter 
-        #existing_file = StorageElModel.query.filter_by(filename = new_filename).first()
-        #ext = new_filename.
-        #while existing_file is not None:
+    
+    def set_filename(self, new_filename): 
+        existing_file = StorageElModel.query.filter_by(filename = new_filename).first()
+        while existing_file is not None:
+            new_filename = StorageElModel.generate_new_filename(new_filename)
+            existing_file = StorageElModel.query.filter_by(filename = new_filename).first()
         self.filename = new_filename
+    
     def share(self, upload_pass = None):
         upload = UploadModel(upload_pass)
         uploaded_file = UploadedFileModel(
@@ -74,3 +78,24 @@ class StorageElModel(db.Model):
         from os import SEEK_END
         file.seek(0, SEEK_END)
         return file.tell()
+    
+    @staticmethod
+    def generate_new_filename(filename):
+        filename_parts = filename.split('.')
+        ext = ''
+        index = 1
+        if len(filename_parts) > 1:
+            ext = filename_parts[-1]
+        filename = filename_parts[0]
+        result = re.search('\([0-9]+\)$', filename)
+        if result is not None:
+          result = result.group()
+          result_len = len(result)
+          index = int(result[1:-1])
+          index += 1
+          filename = filename[:-result_len]
+        if ext != '':
+          filename = f'{filename}({index}).{ext}'
+        else:
+          filename = f'{filename}({index})'
+        return filename

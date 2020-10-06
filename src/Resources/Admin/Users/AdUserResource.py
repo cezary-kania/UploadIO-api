@@ -18,7 +18,7 @@ class AdUserResource(Resource):
         user = UserModel.get_user(login = user_login)
         if user is None:
             abort(404, message='Invalid user login')
-            UserModel.delete_user(user.login)
+        UserModel.delete_user(user.login)
         return {'msg' : 'User deleted'}, 204
     
     @admin_required   

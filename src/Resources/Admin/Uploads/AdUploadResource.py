@@ -20,7 +20,7 @@ class AdUploadResource(Resource):
         upload = UploadModel.get_upload_by_url_hash(url_hash)
         if upload is None:
             abort(404, message='Invalid url hash')
-            upload.delete()
+        upload.delete()
         return {'msg' : 'Upload deleted'}, 204
     
     @admin_required   

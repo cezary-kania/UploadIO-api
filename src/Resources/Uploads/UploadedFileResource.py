@@ -1,6 +1,5 @@
 from flask_restful import Resource, abort, request, reqparse
 from werkzeug import Response
-
 from Models.Uploads.UploadModel import UploadModel
 from Models.Uploads.UploadedFileModel import UploadedFileModel
 from Serializers.UploadFields import upload_fields
