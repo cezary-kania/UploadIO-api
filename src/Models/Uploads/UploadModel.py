@@ -41,8 +41,8 @@ class UploadModel(db.Model):
     def check_expiration_time(self):
         date = str(dt.today())
         if self.expiration_date is None: return True
-        expired = self.expiration_date >= date
-        self.is_active = expired
+        expired = self.expiration_date <= date
+        self.is_active = not expired
         return expired 
     def check_is_active(self):
         return self.is_active

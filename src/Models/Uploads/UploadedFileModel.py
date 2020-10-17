@@ -14,10 +14,13 @@ class UploadedFileModel(db.Model):
     mongo_id = db.Column(db.String(20), nullable = False)
     
     def __init__(self, file, number_in_upload = 1, user_upload = False):
+        
         self.number_in_upload = number_in_upload
+        
         if user_upload is False:
             self.filename = file.filename
-            self.mongo_id = str(gfs.put(file, content_type = file.content_type, filename = file.filename))
+            oid = gfs.put(file, content_type = file.content_type, filename = file.filename)
+            self.mongo_id = str(oid)
         else:
             self.filename = file["filename"]
             self.mongo_id = file["mongo_id"]
@@ -38,13 +41,13 @@ class UploadedFileModel(db.Model):
     def get_file_by_upload(url_hash,password, file_index):
         result_upload = UploadModel.query.filter_by(url_hash = url_hash).first()
         if result_upload is None:
-            raise Exception(message = "Upload not found.")
+            raise Exception("Upload not found.")
         if result_upload.is_pass_required() and (not result_upload.verify_pass(password)):
-            raise Exception(message = "Password incorrect.")
-        if not result_upload.has_expired:
-            raise Exception(message = "Upload expired.")
+            raise Exception("Password incorrect.")
+        if result_upload.has_expired:
+            raise Exception("Upload expired.")
         result_file = UploadedFileModel.query.filter_by(upload_id = result_upload.id, number_in_upload = file_index).first()
         if result_file is None:
-            raise Exception(message = "File not found.")
+            raise Exception("File not found.")
         file = gfs.get(ObjectId(result_file.mongo_id))
         return file
