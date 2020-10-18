@@ -21,7 +21,10 @@ class UserLoginResource(Resource):
         if not user.validate_pass(user_pass):
             abort(400, message = f'User login or password not valid. Try again.')
         return {
-            'Login' : user.login,
+            'login' : user.login,
+            'email' : user.email,
+            'account_type' : user.account_type,
+            'account_creation_date' : user.account_creation_date,
             'access_token' : create_access_token(identity = user.login),
             'refresh_token' : create_refresh_token(identity = user.login)
         }, 200

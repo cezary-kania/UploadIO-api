@@ -21,9 +21,9 @@ class UploadResource(Resource):
         if request_size > GigaByte:
             abort(400, message = 'Maximum upload size is 1GB.')
         upload_pass = request.form['upload_pass']
-        days_to_expire = int(request.form['days_to_expire'])
+        days_to_expire = request.form['days_to_expire']
         
-        days_to_expire = 1 if days_to_expire is None or days_to_expire not in [1, 2, 7, 14] else int(days_to_expire)
+        days_to_expire = 1 if days_to_expire is None or days_to_expire not in ['1', '2', '7', '14'] else int(days_to_expire)
         new_upload = UploadModel(upload_pass,days_to_expire)
         new_upload.size = request_size
         new_upload.save()
@@ -38,10 +38,10 @@ class UploadResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('upload_hash', required = True, location = 'args')
-        parser.add_argument('upload_pass', required = False, location = 'headers')
+        parser.add_argument('uploadPass', required = True, location = 'headers')
         request_data = parser.parse_args()
         url_hash = request_data['upload_hash']
-        upload_pass = request_data['upload_pass']
+        upload_pass = request_data['uploadPass']
         upload = UploadModel.get_upload_by_url_hash(url_hash)
         if upload is None:
             abort(404, message='Invalid url hash')
@@ -50,6 +50,7 @@ class UploadResource(Resource):
         if not upload.check_is_active():
             abort(400, message='Upload not active')
         if upload.is_pass_required():
+            print(upload_pass)
             if upload_pass is None or (not upload.verify_pass(upload_pass)):
                 abort(400, message = 'Invalid password')
         return marshal(upload, upload_fields, envelope='Upload')

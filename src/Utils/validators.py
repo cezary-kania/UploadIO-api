@@ -5,7 +5,7 @@ def upload_password(pass_str):
     raise ValueError('Password is too short.') 
 
 def user_password(pass_str):
-    if len(pass_str) > 8 and re.search('[a-z]', pass_str) is not None \
+    if len(pass_str) >= 8 and re.search('[a-z]', pass_str) is not None \
         and re.search('[A-Z]', pass_str) is not None \
             and re.search('[0-9]', pass_str) is not None:
         return pass_str
