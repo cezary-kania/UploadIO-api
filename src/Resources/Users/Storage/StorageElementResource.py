@@ -4,6 +4,7 @@ from flask_restful import Resource, abort, reqparse, marshal
 from werkzeug import Response
 
 from Serializers.StorageElementFields import storage_element_fields
+from Serializers.StorageFields import storage_fields
 from Models.Users.StorageElModel import StorageElModel
 from Models.Users.UserModel import UserModel
 
@@ -21,7 +22,7 @@ class StorageElementResource(Resource):
         if not self.validate_user_access(user, stElement):
             abort(401)
         user.storage.delete_element(st_element = stElement)
-        return {'msg' : 'Element deleted'}, 204 
+        return marshal(user.storage, storage_fields), 204
     
     @jwt_required
     def put(self, element_id):

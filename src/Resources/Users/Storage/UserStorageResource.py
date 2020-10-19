@@ -30,6 +30,6 @@ class UserStorageResource(Resource):
         if file_size + used_space >= 10*GigaByte:
             abort(400, message = 'File storage capacity exceeded. File not uploaded')
         stElement = user.storage.add_file(file)
-        return marshal(stElement, storage_element_fields), 200
+        return marshal(user.storage, storage_fields), 200
 
 
