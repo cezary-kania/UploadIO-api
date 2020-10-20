@@ -50,9 +50,9 @@ class StorageElementResource(Resource):
             elif new_share_state == "False":
                 stElement.disable_sharing()
         if new_filename is not None:
-            stElement.set_filename(new_filename)
+            stElement.set_filename(new_filename, user.storage.id)
         stElement.save()
-        return marshal(stElement, storage_element_fields, envelope="Storage element")
+        return marshal(stElement, storage_element_fields)
     
     @jwt_required
     def get(self, element_id):

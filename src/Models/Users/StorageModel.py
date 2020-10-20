@@ -30,7 +30,7 @@ class StorageModel(db.Model):
         db.session.commit()
 
     def add_file(self, file):
-        stElement = StorageElModel(file)
+        stElement = StorageElModel(file, self.id)
         stElement.storage = self 
         stElement.add()
         return stElement

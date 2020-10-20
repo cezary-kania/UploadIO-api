@@ -32,4 +32,12 @@ class UserStorageResource(Resource):
         stElement = user.storage.add_file(file)
         return marshal(user.storage, storage_fields), 200
 
-
+    @jwt_required
+    def delete(self): 
+        user_identity = get_jwt_identity()
+        user = UserModel.get_user(login = user_identity)
+        if user is None:
+            abort(500, message = 'Something gone wrong.')
+        user.storage.clear()
+        return marshal(user.storage, storage_fields), 204
+    
