@@ -19,6 +19,7 @@ class StorageElModel(db.Model):
     is_shared = db.Column(db.Boolean, nullable = False, default = False)
     share_url = db.Column(db.String(10), default = None)
     size = db.Column(db.Integer, nullable = False)
+    
     def __init__(self, file, storage_id, el_type = 'file'):
         self.set_filename(file.filename, storage_id)
         self.el_type = el_type 
@@ -33,6 +34,8 @@ class StorageElModel(db.Model):
     def save(self):
         db.session.commit()
     def delete(self):
+        if self.is_shared is True:
+            self.disable_sharing()
         gfs.delete(ObjectId(self.mongo_id))
         db.session.delete(self)
         db.session.commit()
@@ -58,11 +61,13 @@ class StorageElModel(db.Model):
         upload.save()
         self.is_shared = True
         self.share_url = upload.url_hash 
+
     def disable_sharing(self):
         self.is_shared = False
         upload = UploadModel.get_upload_by_url_hash(self.share_url)
         self.share_url = None
         upload.is_active = False
+        db.session.commit()
     def get_share_info(self):
         return {
             "is_shared" : self.is_shared,
@@ -72,6 +77,8 @@ class StorageElModel(db.Model):
     def get_element(**params):
         if 'id' in params.keys():
             return StorageElModel.query.filter_by(id = params['id']).first()
+        if 'share_url' in params.keys():
+            return StorageElModel.query.filter_by(share_url = params['share_url']).first()
         return None
     @staticmethod
     def get_file_size(file):

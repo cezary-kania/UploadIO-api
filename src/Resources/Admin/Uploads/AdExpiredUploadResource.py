@@ -17,4 +17,4 @@ class AdExpiredUploadResource(Resource):
     @admin_required   
     def get(self):
         uploads = UploadModel.get_expired_uploads()
-        return marshal(uploads,upload_fields, envelope='Uploads')
+        return marshal(uploads,upload_fields)

@@ -11,7 +11,7 @@ class AdUploadResource(Resource):
     @admin_required
     def delete(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('upload_hash', required = False, location = 'json')
+        parser.add_argument('upload_hash', required = False, location = 'args')
         request_data = parser.parse_args()
         url_hash = request_data['upload_hash']
         if url_hash is None: 
@@ -26,14 +26,14 @@ class AdUploadResource(Resource):
     @admin_required   
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('upload_hash', required = False, location = 'json')
+        parser.add_argument('upload_hash', required = False, location = 'args')
         request_data = parser.parse_args()
         url_hash = request_data['upload_hash']
         if url_hash is None:
             uploads = UploadModel.get_all_uploads()
-            return marshal(uploads,upload_fields, envelope='Uploads')
+            return marshal(uploads, upload_fields)
         upload = UploadModel.get_upload_by_url_hash(url_hash)
         if upload is None:
             abort(404, message='Invalid url hash')
-        return marshal(upload, upload_fields, envelope='Upload')
+        return marshal(upload, upload_fields)
 

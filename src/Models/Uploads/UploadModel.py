@@ -87,10 +87,23 @@ class UploadModel(db.Model):
         return rows_deleted
 
     def delete(self):
-        for file in self.uploaded_files:
-            file.delete()
+        if self.expiration_date is None:
+            UploadModel.disable_user_upload(self)
+        else:
+            for file in self.uploaded_files:
+                file.delete()
         db.session.delete(self)
         db.session.commit()
+
+    @staticmethod
+    def disable_user_upload(upload):
+        url_hash = upload.url_hash
+        for file in upload.uploaded_files:
+            file.soft_delete()
+        from Models.Users.StorageElModel import StorageElModel
+        stElement = StorageElModel.get_element(share_url = url_hash)
+        if stElement is not None:
+            stElement.disable_sharing()
 
     @staticmethod
     def delete_upload(hash):

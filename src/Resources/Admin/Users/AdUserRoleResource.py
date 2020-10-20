@@ -6,7 +6,7 @@ from Utils.JWT import admin_required
 
 class AdUserRoleResource(Resource):
     
-    #@admin_required   
+    @admin_required   
     def put(self):
         parser = reqparse.RequestParser()
         parser.add_argument('user_login', required = True, location = 'json')

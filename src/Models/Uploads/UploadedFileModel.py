@@ -34,6 +34,10 @@ class UploadedFileModel(db.Model):
         db.session.delete(self)
         db.session.commit()
     
+    def soft_delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def __repr__(self):
         return f'UploadedFileModel<{self.upload_id},{self.number_in_upload}, {self.filename}>'
 
