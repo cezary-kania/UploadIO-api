@@ -1,7 +1,9 @@
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'some-secret-string'
-
+     # JWT 
+    JWT_SECRET_KEY = 'jwt-sercret-string'
+    
 class ProdConfig(Config):
     SQLALCHEMY_DATABASE_URI = ''
     MONGO_URI = ''
@@ -13,6 +15,3 @@ class DevConfig(Config):
     MONGO_URI = 'mongodb://localhost:27017/'
     ENV = 'development'
     DEBUG = True
-    # JWT 
-    JWT_SECRET_KEY = 'jwt-sercret-string'
-    JWT_ACCESS_TOKEN_EXPIRES = False
